@@ -1,6 +1,6 @@
 {
   "name": "World",
   "tagline": "An(other) Everybody Edits Library - Sync & Save Worlds",
-  "body": "### World\r\nThis is an example paragraph.\r\n\r\n### Getting started\r\nThis is an example paragraph.",
+  "body": "![World Logo](https://cdn.rawgit.com/atillabyte/17fcba44bfd7a1ebbd91c1d9402969e8/raw/WorldLogo.svg)\r\n### World\r\nThis is an example paragraph.\r\n\r\n### Getting started\r\nThis is an example paragraph.",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
