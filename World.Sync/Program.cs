@@ -1,8 +1,9 @@
 ﻿using PlayerIOClient;
+using System;
 
-class Program
+internal class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         var client = PlayerIO.QuickConnect.SimpleConnect("everybody-edits-su9rn58o40itdbnw69plyw", "email", "password", null);
         var con = client.Multiplayer.CreateJoinRoom("WorldId", "Everybodyedits" + client.BigDB.Load("config", "config")["version"], true, null, null);
@@ -17,9 +18,11 @@ class Program
                     Client = client,
                     Connection = con,
                     Target = "WorldId",
-                    Source = @"X:\WorldId.json"
+                    Source = @"X:\world.json"
                 }).Upload();
             }
         };
+
+        Console.ReadLine();
     }
 }

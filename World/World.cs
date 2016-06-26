@@ -68,7 +68,8 @@ public class World
                 }).Invoke());
 
         foreach (var block in packets)
-            if (this.Config.Connection.Connected) Task.Run(async () => { Console.WriteLine(block); this.Config.Connection.Send(block); await Task.Delay(16); }).Wait();
+            if (this.Config.Connection.Connected)
+                Task.Run(async () => { this.Config.Connection.Send(block); await Task.Delay(16); }).Wait();
             else return Status.Incompleted;
 
         return Status.Completed;
@@ -111,6 +112,9 @@ static internal class Helpers
     public static List<World.Block> FromWorldData(this DatabaseArray source)
     {
         var blocks = new List<World.Block>();
+
+        if (source == null || !source.Any())
+            return blocks;
 
         for (int i = 0; i < source.Count; i++)
         {
@@ -158,7 +162,7 @@ static internal class Helpers
             var temp = new World.Block();
 
             dbo = properties.Select(p =>
-                 (p.Value.Type == JTokenType.Integer) ? dbo.Set(p.Name, p.Value.ToObject<uint>()) :
+                 (p.Value.Type == JTokenType.Integer) ? dbo.Set(p.Name, p.Value.ToObject<int>()) :
                  (p.Value.Type == JTokenType.Boolean) ? dbo.Set(p.Name, p.Value.ToObject<bool>()) : dbo.Set(p.Name, p.Value.ToObject<string>())).Last();
 
             byte[] x = (!string.IsNullOrEmpty(dbo.GetString("x", ""))) ? Convert.FromBase64String(dbo.GetString("x")).HandleCompression() : new byte[0],
@@ -234,7 +238,7 @@ static internal class Helpers
         if (input == null)
             throw new ArgumentNullException("input", "The specified DatabaseObject is null.");
 
-        File.WriteAllText(JsonConvert.SerializeObject(input.Extract()), path);
+        File.WriteAllText(path, JsonConvert.SerializeObject(input.Extract()));
     }
 
     class Compression
