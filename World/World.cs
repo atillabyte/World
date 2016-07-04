@@ -46,18 +46,11 @@ public class World
         var target = this.Config.Client.BigDB.Load("worlds", this.Config.Target).GetArray("worlddata").FromWorldData();
 
         var filter = new List<string>() { "type", "layer", "x", "y", "x1", "y1" };
-        var normal = this.Queue.Where(p => !p.Source.Properties.Except(filter).Any()).ToList();
-        var special = this.Queue.Where(p => p.Source.Properties.Except(filter).Any()).ToList();
-
         var packets = new List<Message>();
 
-        foreach (var block in normal)
+        foreach (var block in this.Queue)
             foreach (var position in block.Positions)
-
-        foreach (var block in special)
-            foreach (var position in block.Positions)
-                packets.Add(new Func<Message>(() =>
-                {
+                packets.Add(new Func<Message>(() => {
                     block.HandleCustomRules();
 
                     var packet = Message.Create("b", block.Layer, position.X, position.Y, block.Type);
@@ -68,7 +61,7 @@ public class World
 
         foreach (var block in packets)
             if (this.Config.Connection.Connected)
-                Task.Run(async () => { this.Config.Connection.Send(block); await Task.Delay(16); }).Wait();
+                Task.Run(async() => { this.Config.Connection.Send(block); await Task.Delay(16); }).Wait();
             else return Status.Incompleted;
 
         return Status.Completed;
@@ -129,19 +122,9 @@ static class Helpers
                        y1 = obj.GetBytes("y1", new byte[0]);
 
                 for (int j = 0; j < x1.Length; j++)
-                {
-                    byte nx = x1[j],
-                         ny = y1[j];
-
-                    temp.Positions.Add(new World.Block.Position() { X = (uint)nx, Y = (uint)ny });
-                }
+                    temp.Positions.Add(new World.Block.Position() { X = (uint)x1[j], Y = (uint)y1[j] });
                 for (int k = 0; k < x.Length; k += 2)
-                {
-                    uint nx2 = (uint)(((int)x[k] << 8) + (int)x[k + 1]),
-                         ny2 = (uint)(((int)y[k] << 8) + (int)y[k + 1]);
-
-                    temp.Positions.Add(new World.Block.Position() { X = (uint)nx2, Y = (uint)ny2 });
-                }
+                    temp.Positions.Add(new World.Block.Position() { X = (uint)(((int)x[k] << 8) + (int)x[k + 1]), Y = (uint)(((int)y[k] << 8) + (int)y[k + 1]) });
 
                 blocks.Add(temp);
             }
@@ -163,7 +146,8 @@ static class Helpers
 
             dbo = properties.Select(p =>
                  (p.Value.Type == JTokenType.Integer) ? dbo.Set(p.Name, (int)(uint)p.Value) :
-                 (p.Value.Type == JTokenType.Boolean) ? dbo.Set(p.Name, (bool)p.Value) : dbo.Set(p.Name, (string)p.Value)).Last();
+                 (p.Value.Type == JTokenType.Boolean) ? dbo.Set(p.Name, (bool)p.Value) :
+                 (p.Value.Type == JTokenType.Float) ? dbo.Set(p.Name, (double)p.Value) : dbo.Set(p.Name, (string)p.Value)).Last();
 
             byte[] x = (!string.IsNullOrEmpty(dbo.GetString("x", ""))) ? Convert.FromBase64String(dbo.GetString("x")).HandleCompression() : new byte[0],
                    y = (!string.IsNullOrEmpty(dbo.GetString("y", ""))) ? Convert.FromBase64String(dbo.GetString("y")).HandleCompression() : new byte[0],
@@ -171,20 +155,9 @@ static class Helpers
                    y1 = (!string.IsNullOrEmpty(dbo.GetString("y1", ""))) ? Convert.FromBase64String(dbo.GetString("y1")).HandleCompression() : new byte[0];
 
             for (int j = 0; j < x1.Length; j++)
-            {
-                byte nx = x1[j],
-                     ny = y1[j];
-
-                temp.Positions.Add(new World.Block.Position() { X = (uint)nx, Y = (uint)ny });
-            }
-
-            for (int k = 0; k < x.Length; k += 2)
-            {
-                uint nx2 = (uint)(((int)x[k] << 8) + (int)x[k + 1]),
-                     ny2 = (uint)(((int)y[k] << 8) + (int)y[k + 1]);
-
-                temp.Positions.Add(new World.Block.Position() { X = (uint)nx2, Y = (uint)ny2 });
-            }
+                temp.Positions.Add(new World.Block.Position() { X = x1[j], Y = y1[j] });
+            for(int k = 0; k < x.Length; k += 2)
+                temp.Positions.Add(new World.Block.Position() { X = (uint)(((int)x[k] << 8) + (int)x[k + 1]), Y = (uint)(((int)y[k] << 8) + (int)y[k + 1]) });
 
             temp.Source = dbo;
             queue.Add(temp);
