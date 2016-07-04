@@ -53,7 +53,6 @@ public class World
 
         foreach (var block in normal)
             foreach (var position in block.Positions)
-                packets.Add(Message.Create("b", block.Layer, position.X, position.Y, block.Type));
 
         foreach (var block in special)
             foreach (var position in block.Positions)
@@ -97,7 +96,7 @@ public class World
     {
         public DatabaseObject Source { get; set; }
         public List<Position> Positions { get; set; } = new List<Position>();
-        public uint Type => Convert.ToUInt32(Source.GetValue("type"));
+        public uint Type => Source.Contains("type") ? Convert.ToUInt32(Source.GetValue("type")) : 0;
         public uint Layer => Source.Contains("layer") ? Convert.ToUInt32(Source.GetValue("layer")) : 0;
 
         public class Position
@@ -107,7 +106,8 @@ public class World
         }
     }
 }
-static internal class Helpers
+
+static class Helpers
 {
     public static List<World.Block> FromWorldData(this DatabaseArray source)
     {
@@ -162,8 +162,8 @@ static internal class Helpers
             var temp = new World.Block();
 
             dbo = properties.Select(p =>
-                 (p.Value.Type == JTokenType.Integer) ? dbo.Set(p.Name, p.Value.ToObject<int>()) :
-                 (p.Value.Type == JTokenType.Boolean) ? dbo.Set(p.Name, p.Value.ToObject<bool>()) : dbo.Set(p.Name, p.Value.ToObject<string>())).Last();
+                 (p.Value.Type == JTokenType.Integer) ? dbo.Set(p.Name, (int)(uint)p.Value) :
+                 (p.Value.Type == JTokenType.Boolean) ? dbo.Set(p.Name, (bool)p.Value) : dbo.Set(p.Name, (string)p.Value)).Last();
 
             byte[] x = (!string.IsNullOrEmpty(dbo.GetString("x", ""))) ? Convert.FromBase64String(dbo.GetString("x")).HandleCompression() : new byte[0],
                    y = (!string.IsNullOrEmpty(dbo.GetString("y", ""))) ? Convert.FromBase64String(dbo.GetString("y")).HandleCompression() : new byte[0],
@@ -243,12 +243,7 @@ static internal class Helpers
 
     class Compression
     {
-        public static bool IsGZipHeader(byte[] arr)
-        {
-            return arr.Length >= 2 &&
-                arr[0] == 31 &&
-                arr[1] == 139;
-        }
+        public static bool IsGZipHeader(byte[] arr) => arr.Length >= 2 && arr[0] == 31 &&  arr[1] == 139;
 
         public static byte[] Compress(byte[] raw)
         {
