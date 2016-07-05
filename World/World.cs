@@ -149,15 +149,15 @@ static class Helpers
                  (p.Value.Type == JTokenType.Boolean) ? dbo.Set(p.Name, (bool)p.Value) :
                  (p.Value.Type == JTokenType.Float) ? dbo.Set(p.Name, (double)p.Value) : dbo.Set(p.Name, (string)p.Value)).Last();
 
-            byte[] x = (!string.IsNullOrEmpty(dbo.GetString("x", ""))) ? Convert.FromBase64String(dbo.GetString("x")).HandleCompression() : new byte[0],
-                   y = (!string.IsNullOrEmpty(dbo.GetString("y", ""))) ? Convert.FromBase64String(dbo.GetString("y")).HandleCompression() : new byte[0],
-                   x1 = (!string.IsNullOrEmpty(dbo.GetString("x1", ""))) ? Convert.FromBase64String(dbo.GetString("x1")).HandleCompression() : new byte[0],
-                   y1 = (!string.IsNullOrEmpty(dbo.GetString("y1", ""))) ? Convert.FromBase64String(dbo.GetString("y1")).HandleCompression() : new byte[0];
+            byte[] x = (!string.IsNullOrEmpty(dbo.GetString("x", ""))) ? Convert.FromBase64String(dbo.GetString("x")) : new byte[0],
+                   y = (!string.IsNullOrEmpty(dbo.GetString("y", ""))) ? Convert.FromBase64String(dbo.GetString("y")) : new byte[0],
+                   x1 = (!string.IsNullOrEmpty(dbo.GetString("x1", ""))) ? Convert.FromBase64String(dbo.GetString("x1")) : new byte[0],
+                   y1 = (!string.IsNullOrEmpty(dbo.GetString("y1", ""))) ? Convert.FromBase64String(dbo.GetString("y1")) : new byte[0];
 
             for (int j = 0; j < x1.Length; j++)
                 temp.Positions.Add(new World.Block.Position() { X = x1[j], Y = y1[j] });
             for(int k = 0; k < x.Length; k += 2)
-                temp.Positions.Add(new World.Block.Position() { X = (uint)(((int)x[k] << 8) + (int)x[k + 1]), Y = (uint)(((int)y[k] << 8) + (int)y[k + 1]) });
+                temp.Positions.Add(new World.Block.Position() { X = (uint)((x[k] << 8) + x[k + 1]), Y = (uint)((y[k] << 8) + y[k + 1]) });
 
             temp.Source = dbo;
             queue.Add(temp);
@@ -175,13 +175,6 @@ static class Helpers
                     block.Source.Set("signtype", 0);
                 break;
         }
-    }
-    public static byte[] HandleCompression(this byte[] property)
-    {
-        if (Compression.IsGZipHeader(property))
-            property = Compression.Decompress(property);
-
-        return property;
     }
 
     public static object Extract(this object input)
@@ -212,45 +205,5 @@ static class Helpers
             throw new ArgumentNullException("input", "The specified DatabaseObject is null.");
 
         File.WriteAllText(path, JsonConvert.SerializeObject(input.Extract()));
-    }
-
-    class Compression
-    {
-        public static bool IsGZipHeader(byte[] arr) => arr.Length >= 2 && arr[0] == 31 &&  arr[1] == 139;
-
-        public static byte[] Compress(byte[] raw)
-        {
-            using (MemoryStream memory = new MemoryStream())
-            {
-                using (GZipStream gzip = new GZipStream(memory,
-                CompressionMode.Compress, true))
-                {
-                    gzip.Write(raw, 0, raw.Length);
-                }
-                return memory.ToArray();
-            }
-        }
-        public static byte[] Decompress(byte[] gzip)
-        {
-            using (GZipStream stream = new GZipStream(new MemoryStream(gzip), CompressionMode.Decompress))
-            {
-                const int size = 2048;
-                byte[] buffer = new byte[size];
-                using (MemoryStream memory = new MemoryStream())
-                {
-                    int count = 0;
-                    do
-                    {
-                        count = stream.Read(buffer, 0, size);
-                        if (count > 0)
-                        {
-                            memory.Write(buffer, 0, count);
-                        }
-                    }
-                    while (count > 0);
-                    return memory.ToArray();
-                }
-            }
-        }
     }
 }
