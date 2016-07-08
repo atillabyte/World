@@ -7,7 +7,6 @@ This library allows saving/uploading worlds to/from JSON directly from BigDB.
 - Properties automatically in proper packet argument order.
 - A Future-proof design, updates unnecessary as long as the server is properly constructed.
 - A very simple, modern and robust format - JSON!
-- A completely optional x/y/x1/y1 compression for smaller file sizes.
 
 ### To-Do
 - Permutation of property order to maintain a last-resort attempt at valid block placement.
