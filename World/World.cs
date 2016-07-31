@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.IO.Compression;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-
 using PlayerIOClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -50,18 +48,18 @@ public class World
 
         foreach (var block in this.Queue)
             foreach (var position in block.Positions)
-                packets.Add(new Func<Message>(() => {
-                    block.HandleCustomRules();
-
-                    var packet = Message.Create("b", block.Layer, position.X, position.Y, block.Type);
+                if (!target.Any(x => x.Type == block.Type && x.Layer == block.Layer && x.Positions.Any(p => p.X == position.X && p.Y == position.Y)))
+                    packets.Add(new Func<Message>(() => {
+                        block.HandleCustomRules();
+                        var packet = Message.Create("b", block.Layer, position.X, position.Y, block.Type);
                         packet.Add(block.Source.Properties.Except(filter).Select(s => block.Source[s]).ToArray());
 
-                    return packet;
-                }).Invoke());
+                        return packet;
+                    }).Invoke());
 
         foreach (var block in packets)
             if (this.Config.Connection.Connected)
-                Task.Run(async() => { this.Config.Connection.Send(block); await Task.Delay(16); }).Wait();
+                Task.Run(async() => { Console.WriteLine(block); this.Config.Connection.Send(block); await Task.Delay(8); }).Wait();
             else return Status.Incompleted;
 
         return Status.Completed;
@@ -132,6 +130,7 @@ static class Helpers
 
         return blocks;
     }
+
     public static List<World.Block> FromJsonArray(this string source)
     {
         var world = JObject.Parse(File.ReadAllText(source));
@@ -199,6 +198,7 @@ static class Helpers
 
         return _dict;
     }
+
     public static void Save(this DatabaseObject input, string path)
     {
         if (input == null)
