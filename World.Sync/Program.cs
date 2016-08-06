@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Threading;
 using PlayerIOClient;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 internal class Program
 {
     static void Main(string[] args)
     {
+        string targetId = "PW0GJS5M2AEI";
+        string inputFile = "PWnP0xQC0vcEI.json";
+
         var client = PlayerIO.QuickConnect.SimpleConnect("everybody-edits-su9rn58o40itdbnw69plyw", "email", "password", null);
-        var con = client.Multiplayer.CreateJoinRoom("WorldId", "Everybodyedits" + client.BigDB.Load("config", "config")["version"], true, null, null);
+        var con = client.Multiplayer.CreateJoinRoom(targetId, "Everybodyedits" + client.BigDB.Load("config", "config")["version"], true, null, null);
 
         con.OnMessage += delegate (object s, Message e)
         {
@@ -17,21 +23,14 @@ internal class Program
             }
 
             if (e.Type == "saved") {
-                var world = new World(World.Input.JSON, new World.Options() {
-                    Client = client,
-                    Connection = con,
-                    Target = "WorldId",
-                    Source = @"world.json"
-                });
+                var world = new World(World.WorldType.JSON, client, inputFile);
+                var status = Upload(world, client, con, targetId);
 
-                var status = world.Upload();
-
-                Console.WriteLine("Status: " + status.ToString());
                 switch (status) {
-                    case World.Status.Incompleted:
+                    case Status.Incompleted:
                         Main(new string[] { });
                         break;
-                    case World.Status.Completed:
+                    case Status.Completed:
                         con.Disconnect();
                         Console.WriteLine("Status: " + status.ToString());
                         break;
@@ -41,5 +40,32 @@ internal class Program
 
         con.Send("init");
         Console.ReadLine();
+    }
+
+    public enum Status { Incompleted, Completed }
+    public static Status Upload(World world, Client client, Connection connection, string targetId)
+    {
+        var target = client.BigDB.Load("worlds", targetId).GetArray("worlddata").FromWorldData().Cast<dynamic>();
+
+        var filter = new List<string>() { "type", "layer", "x", "y", "x1", "y1" };
+        var packets = new List<Message>();
+
+        foreach (dynamic block in world.Blocks as List<World.Block>)
+            foreach (var position in block.Positions)
+                if (!target.Any(x => x.Type == block.Type && x.Layer == block.Layer && ((IEnumerable<dynamic>)x.Positions).Any(p => p.X == position.X && p.Y == position.Y)))
+                    packets.Add(new Func<Message>(() => {
+                        var packet = Message.Create("b", block.Layer, position.X, position.Y, block.Type);
+                        packet.Add(((List<KeyValuePair<string, object>>)block.Values).Where(x => !filter.Contains(x.Key)).Select(x => block[x.Key]).ToArray());
+
+                        return packet;
+                    }).Invoke());
+
+        foreach (var block in packets)
+            if (connection.Connected)
+                Task.Run(async () => { Console.WriteLine(block); connection.Send(block); await Task.Delay(8); }).Wait();
+            else
+                return Status.Incompleted;
+
+        return Status.Completed;
     }
 }
