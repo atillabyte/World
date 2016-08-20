@@ -9,8 +9,8 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        string targetId = "PW0GJS5M2AEI";
-        string inputFile = "PWnP0xQC0vcEI.json";
+        string targetId = "PWInputAn_IdEI";
+        string inputFile = "PWInputAn_IdEI.json";
 
         var client = PlayerIO.QuickConnect.SimpleConnect("everybody-edits-su9rn58o40itdbnw69plyw", "email", "password", null);
         var con = client.Multiplayer.CreateJoinRoom(targetId, "Everybodyedits" + client.BigDB.Load("config", "config")["version"], true, null, null);
