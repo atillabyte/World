@@ -42,6 +42,7 @@ public unsafe class FastBitmap : IDisposable
     public IntPtr Scan0 { get { return _bitmapData.Scan0; } }
     public int Stride { get { return _strideWidth; } }
     public bool Locked { get { return _locked; } }
+
     public int[] DataArray
     {
         get {
@@ -51,16 +52,13 @@ public unsafe class FastBitmap : IDisposable
                 unlockAfter = true;
             }
 
-            // Declare an array to hold the bytes of the bitmap
             int bytes = Math.Abs(_bitmapData.Stride) * _bitmap.Height;
             int[] argbValues = new int[bytes / BytesPerPixel];
 
-            // Copy the RGB values into the array
             Marshal.Copy(_bitmapData.Scan0, argbValues, 0, bytes / BytesPerPixel);
 
-            if (unlockAfter) {
+            if (unlockAfter)
                 Unlock();
-            }
 
             return argbValues;
         }
@@ -68,9 +66,8 @@ public unsafe class FastBitmap : IDisposable
 
     public FastBitmap(Bitmap bitmap)
     {
-        if (Image.GetPixelFormatSize(bitmap.PixelFormat) != 32) {
+        if (Image.GetPixelFormatSize(bitmap.PixelFormat) != 32)
             throw new ArgumentException("The provided bitmap must have a 32bpp depth", "bitmap");
-        }
 
         _bitmap = bitmap;
 
@@ -80,16 +77,14 @@ public unsafe class FastBitmap : IDisposable
 
     public void Dispose()
     {
-        if (_locked) {
+        if (_locked)
             Unlock();
-        }
     }
 
     public FastBitmapLocker Lock()
     {
-        if (_locked) {
+        if (_locked)
             throw new InvalidOperationException("Unlock must be called before a Lock operation");
-        }
 
         return Lock(ImageLockMode.ReadWrite);
     }
@@ -116,12 +111,10 @@ public unsafe class FastBitmap : IDisposable
 
     public void Unlock()
     {
-        if (!_locked) {
+        if (!_locked)
             throw new InvalidOperationException("Lock must be called before an Unlock operation");
-        }
 
         _bitmap.UnlockBits(_bitmapData);
-
         _locked = false;
     }
 
@@ -137,16 +130,13 @@ public unsafe class FastBitmap : IDisposable
 
     public void SetPixel(int x, int y, uint color)
     {
-        if (!_locked) {
+        if (!_locked)
             throw new InvalidOperationException("The FastBitmap must be locked before any pixel operations are made");
-        }
 
-        if (x < 0 || x >= _width) {
+        if (x < 0 || x >= _width)
             throw new ArgumentOutOfRangeException("The X component must be >= 0 and < width");
-        }
-        if (y < 0 || y >= _height) {
+        if (y < 0 || y >= _height)
             throw new ArgumentOutOfRangeException("The Y component must be >= 0 and < height");
-        }
 
         *(uint*)(_scan0 + x + y * _strideWidth) = color;
     }
@@ -158,53 +148,44 @@ public unsafe class FastBitmap : IDisposable
 
     public int GetPixelInt(int x, int y)
     {
-        if (!_locked) {
+        if (!_locked)
             throw new InvalidOperationException("The FastBitmap must be locked before any pixel operations are made");
-        }
 
-        if (x < 0 || x >= _width) {
+        if (x < 0 || x >= _width)
             throw new ArgumentOutOfRangeException("The X component must be >= 0 and < width");
-        }
-        if (y < 0 || y >= _height) {
+        if (y < 0 || y >= _height)
             throw new ArgumentOutOfRangeException("The Y component must be >= 0 and < height");
-        }
 
         return *(_scan0 + x + y * _strideWidth);
     }
 
     public uint GetPixelUInt(int x, int y)
     {
-        if (!_locked) {
+        if (!_locked)
             throw new InvalidOperationException("The FastBitmap must be locked before any pixel operations are made");
-        }
 
-        if (x < 0 || x >= _width) {
+        if (x < 0 || x >= _width)
             throw new ArgumentOutOfRangeException("The X component must be >= 0 and < width");
-        }
-        if (y < 0 || y >= _height) {
+        if (y < 0 || y >= _height)
             throw new ArgumentOutOfRangeException("The Y component must be >= 0 and < height");
-        }
 
         return *((uint*)_scan0 + x + y * _strideWidth);
     }
 
     public void CopyFromArray(int[] colors, bool ignoreZeroes = false)
     {
-        if (colors.Length != _width * _height) {
+        if (colors.Length != _width * _height)
             throw new ArgumentException("The number of colors of the given array mismatch the pixel count of the bitmap", "colors");
-        }
 
-        // Simply copy the argb values array
         int* s0t = _scan0;
 
         fixed (int* source = colors) {
             int* s0s = source;
-            int bpp = 1; // Bytes per pixel
+            int bpp = 1;
 
             int count = _width * _height * bpp;
 
             if (!ignoreZeroes) {
-                // Unfold the loop
                 const int sizeBlock = 8;
                 int rem = count % sizeBlock;
 
@@ -222,9 +203,8 @@ public unsafe class FastBitmap : IDisposable
                     *(s0t++) = *(s0s++);
                 }
 
-                while (rem-- > 0) {
+                while (rem-- > 0)
                     *(s0t++) = *(s0s++);
-                }
             } else {
                 while (count-- > 0) {
                     if (*(s0s) == 0) { s0t++; s0s++; continue; }
@@ -247,12 +227,9 @@ public unsafe class FastBitmap : IDisposable
             unlockAfter = true;
         }
 
-        // Clear all the pixels
         int count = _width * _height;
         int* curScan = _scan0;
 
-        // Defines the ammount of assignments that the main while() loop is performing per loop.
-        // The value specified here must match the number of assignment statements inside that loop
         const int assignsPerLoop = 8;
 
         int rem = count % assignsPerLoop;
@@ -269,43 +246,32 @@ public unsafe class FastBitmap : IDisposable
             *(curScan++) = color;
             *(curScan++) = color;
         }
-        while (rem-- > 0) {
-            *(curScan++) = color;
-        }
 
-        if (unlockAfter) {
+        while (rem-- > 0)
+            *(curScan++) = color;
+
+        if (unlockAfter)
             Unlock();
-        }
     }
 
     public void CopyRegion(Bitmap source, Rectangle srcRect, Rectangle destRect)
     {
-        // Throw exception when trying to copy same bitmap over
-        if (source == _bitmap) {
+        if (source == _bitmap)
             throw new ArgumentException("Copying regions across the same bitmap is not supported", "source");
-        }
 
         Rectangle srcBitmapRect = new Rectangle(0, 0, source.Width, source.Height);
         Rectangle destBitmapRect = new Rectangle(0, 0, _width, _height);
 
-        // Check if the rectangle configuration doesn't generate invalid states or does not affect the target image
         if (srcRect.Width <= 0 || srcRect.Height <= 0 || destRect.Width <= 0 || destRect.Height <= 0 ||
             !srcBitmapRect.IntersectsWith(srcRect) || !destRect.IntersectsWith(destBitmapRect))
             return;
 
-        // Find the areas of the first and second bitmaps that are going to be affected
         srcBitmapRect = Rectangle.Intersect(srcRect, srcBitmapRect);
-
-        // Clip the source rectangle on top of the destination rectangle in a way that clips out the regions of the original bitmap
-        // that will not be drawn on the destination bitmap for being out of bounds
         srcBitmapRect = Rectangle.Intersect(srcBitmapRect, new Rectangle(srcRect.X, srcRect.Y, destRect.Width, destRect.Height));
-
         destBitmapRect = Rectangle.Intersect(destRect, destBitmapRect);
 
-        // Clipt the source bitmap region yet again here
         srcBitmapRect = Rectangle.Intersect(srcBitmapRect, new Rectangle(-destRect.X + srcRect.X, -destRect.Y + srcRect.Y, _width, _height));
 
-        // Calculate the rectangle containing the maximum possible area that is supposed to be affected by the copy region operation
         int copyWidth = Math.Min(srcBitmapRect.Width, destBitmapRect.Width);
         int copyHeight = Math.Min(srcBitmapRect.Height, destBitmapRect.Height);
 
@@ -372,7 +338,7 @@ public unsafe class FastBitmap : IDisposable
 
     // .NET wrapper to native call of 'memcpy'. Requires Microsoft Visual C++ Runtime installed
     [DllImport("msvcrt.dll", EntryPoint = "memcpy", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-    public static extern IntPtr memcpy(IntPtr dest, IntPtr src, ulong count);
+    private static extern IntPtr memcpy(IntPtr dest, IntPtr src, ulong count);
 
     // .NET wrapper to native call of 'memcpy'. Requires Microsoft Visual C++ Runtime installed
     [DllImport("msvcrt.dll", EntryPoint = "memcpy", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]

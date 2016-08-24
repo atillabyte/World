@@ -20,7 +20,7 @@ internal class Program
         Console.ReadLine();
     }
 
-    public static Bitmap GenerateMinimap(dynamic world)
+    static Bitmap GenerateMinimap(dynamic world)
     {
         var canvas = new Bitmap((int?)world.width ?? 200, (int?)world.height ?? 200);
         var bitmap = new FastBitmap(canvas);
@@ -38,7 +38,6 @@ internal class Program
         return canvas;
     }
 
-    public static Dictionary<int, uint> colors = new WebClient() { Proxy = null }.DownloadString("https://raw.githubusercontent.com/EEJesse/EEBlocks/master/Colors.txt").Split('\n')
+    static Dictionary<int, uint> colors = new WebClient() { Proxy = null }.DownloadString("https://raw.githubusercontent.com/EEJesse/EEBlocks/master/Colors.txt").Split('\n')
             .Where(x => !string.IsNullOrEmpty(x)).ToDictionary(x => int.Parse(x.Split(' ')[0]), x => uint.Parse(x.Split(' ')[1]));
-
 }

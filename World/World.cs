@@ -2,6 +2,7 @@
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -21,31 +22,23 @@ public class World : Dynamic
     }
 
     public enum WorldType { BigDB, JSON };
-    private WorldType _input;
-    private DatabaseObject _world;
     public World(WorldType input, Client client, params string[] arguments)
     {
-        this._input = input;
-
         switch (input) {
             case WorldType.BigDB: {
                     var world = client.BigDB.Load("worlds", arguments[0]);
-                    this._world = world;
                     this.Blocks = world.GetArray("worlddata").FromWorldData();
 
                     foreach (var property in world)
-                        if (property.Key != "worlddata")
-                            this[property.Key] = property.Value;
-
+                        this[property.Key] = property.Value;
                 }
                 break;
             case WorldType.JSON: {
-                    var world = File.ReadAllText(arguments[0]);
+                    var world = JObject.Parse(File.ReadAllText(arguments[0]));
                     this.Blocks = world.FromJsonArray();
 
-                    foreach (var property in JObject.Parse(world))
-                        if (property.Key != "worlddata")
-                            this[property.Key] = property.Value;
+                    foreach (var property in world)
+                        this[property.Key] = property.Value;
                 }
                 break;
         }
@@ -56,7 +49,7 @@ public class World : Dynamic
     {
         switch (notation) {
             case NotationType.JSON:
-                return JsonConvert.SerializeObject(_world.ExtractDatabaseObject());
+                return JsonConvert.SerializeObject(this.Properties, (arguments.Contains("indented") ? Formatting.Indented : Formatting.None));
         }
 
         return null;
@@ -93,9 +86,9 @@ public static class Helpers
 
         return blocks;
     }
-    public static List<World.Block> FromJsonArray(this string input)
+
+    public static List<World.Block> FromJsonArray(this JObject world)
     {
-        var world = JObject.Parse(input);
         var array = world["worlddata"].Values().Select(x => (IEnumerable<JToken>)x);
 
         var temp = new DatabaseArray();
@@ -120,6 +113,7 @@ public static class Helpers
 
         return defaultValue;
     }
+
     public static object ExtractDatabaseObject(this object input)
     {
         var _dict = new Dictionary<object, object>();
@@ -142,11 +136,13 @@ public static class Helpers
 
 public abstract class Dynamic : DynamicObject
 {
-    private Dictionary<string, object> dictionary = new Dictionary<string, object>();
-    public int Count { get { return dictionary.Count; } }
+    public Dictionary<string, object> Properties = new Dictionary<string, object>();
+    public int Count => Properties.Count;
+    public List<KeyValuePair<string, object>> ToList() => Properties.ToList();
 
-    public object this[string key] { get { return (dictionary.ContainsKey(key)) ? dictionary[key] : null; } set { dictionary[key] = value; } }
-    public List<KeyValuePair<string, object>> Values => dictionary.ToList();
-    public override bool TryGetMember(GetMemberBinder binder, out object result) => dictionary.TryGetValue(binder.Name.ToLower(), out result);
-    public override bool TrySetMember(SetMemberBinder binder, object value) { dictionary[binder.Name.ToLower()] = value; return true; }
+    public IEnumerator GetEnumerator() => Properties.GetEnumerator();
+
+    public object this[string key] { get { return (Properties.ContainsKey(key)) ? Properties[key] : null; } set { Properties[key] = value; } }
+    public override bool TryGetMember(GetMemberBinder binder, out object result) => Properties.TryGetValue(binder.Name.ToLower(), out result);
+    public override bool TrySetMember(SetMemberBinder binder, object value) { Properties[binder.Name.ToLower()] = value; return true; }
 }
