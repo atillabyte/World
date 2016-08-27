@@ -9,8 +9,8 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        string targetId = "PWInputAn_IdEI";
-        string inputFile = "PWInputAn_IdEI.json";
+        string targetId = "PWInputAn_Id";
+        string inputFile = @"PWInputAn_Id.json";
 
         var client = PlayerIO.QuickConnect.SimpleConnect("everybody-edits-su9rn58o40itdbnw69plyw", "email", "password", null);
         var con = client.Multiplayer.CreateJoinRoom(targetId, "Everybodyedits" + client.BigDB.Load("config", "config")["version"], true, null, null);
@@ -55,7 +55,7 @@ internal class Program
                 if (!target.Any(x => x.Type == block.Type && x.Layer == block.Layer && ((IEnumerable<dynamic>)x.Positions).Any(p => p.X == position.X && p.Y == position.Y)))
                     packets.Add(new Func<Message>(() => {
                         var packet = Message.Create("b", block.Layer, position.X, position.Y, block.Type);
-                        packet.Add(((List<KeyValuePair<string, object>>)block.Values).Where(x => !filter.Contains(x.Key)).Select(x => block[x.Key]).ToArray());
+                        packet.Add(((Dictionary<string, object>)block.Properties).Where(x => !filter.Contains(x.Key)).Select(x => block[x.Key]).ToArray());
 
                         return packet;
                     }).Invoke());

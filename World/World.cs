@@ -14,7 +14,7 @@ public class World : Dynamic
     public class Block : Dynamic
     {
         public List<Position> Positions { get; set; } = new List<Position>();
-        public struct Position
+        public class Position
         {
             public uint X { get; set; }
             public uint Y { get; set; }
