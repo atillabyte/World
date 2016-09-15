@@ -1,32 +1,34 @@
-﻿/*
-    The MIT License (MIT)
-
-    Copyright (c) 2014 Luiz Fernando Silva
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
-*/
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 
+public static class Minimap
+{
+    public static Bitmap Create(World world)
+    {
+        var canvas = new Bitmap(world.Width, world.Height);
+        var bitmap = new FastBitmap(canvas);
+
+        bitmap.Lock();
+        bitmap.Clear(world.BackgroundColor);
+
+        foreach (var block in world.Blocks.Where(block => colors[Convert.ToInt32(block.Type)] != 0u).OrderByDescending(x => x.Layer >= 1))
+            foreach (var location in block.Locations)
+                bitmap.SetPixel(location.X, location.Y, colors[Convert.ToInt32(block.Type)]);
+
+        bitmap.Unlock();
+        return canvas;
+    }
+
+    static Dictionary<int, uint> colors = new WebClient() { Proxy = null }.DownloadString("https://raw.githubusercontent.com/EEJesse/EEBlocks/master/Colors.txt").Split('\n')
+            .Where(x => !string.IsNullOrEmpty(x)).ToDictionary(x => int.Parse(x.Split(' ')[0]), x => uint.Parse(x.Split(' ')[1]));
+}
+
+/// <!-- FastBitmap | The MIT License (MIT) | (c) Luiz Fernando Silva -->
 public unsafe class FastBitmap : IDisposable
 {
     private const int BytesPerPixel = 4;
@@ -365,7 +367,6 @@ public unsafe class FastBitmap : IDisposable
         }
     }
 }
-
 public static class FastBitmapExtensions
 {
     public static FastBitmap FastLock(this Bitmap bitmap)

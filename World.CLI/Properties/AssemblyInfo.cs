@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("World.Minimap")]
+[assembly: AssemblyTitle("World.CLI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Hewlett-Packard")]
-[assembly: AssemblyProduct("World.Minimap")]
+[assembly: AssemblyProduct("World.CLI")]
 [assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("e9ef79ce-0dd8-43fa-bd60-03a1571611aa")]
+[assembly: Guid("f3325885-e8be-4221-9965-f237f2e9b69c")]
 
 // Version information for an assembly consists of the following four values:
 //
