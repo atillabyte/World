@@ -1,15 +1,20 @@
 ﻿using System;
-using CLAP;
-using static World;
 using System.IO;
+using System.Threading;
+using static World;
+using CLAP;
 
 class Program
 {
     static void Main(string[] args)
     {
-        Parser.Run<Interface>(Console.ReadLine().Split(' '));
-
-        System.Threading.Thread.Sleep(-1);
+        if (args.Length == 0) {
+            Console.Write("No arguments specified.");
+            return;
+        }
+            
+        Parser.Run<Interface>(args);
+        Thread.Sleep(-1);
     }
 }
 
@@ -37,12 +42,15 @@ class Interface
         if (File.Exists(input)) {
             var world = new World(InputType.JSON, input, client);
             var sync = new SyncWorld(world, client, target, null);
+
+            sync.OnTimeout += () => { Environment.Exit(-1); };
+            sync.OnCompleted += () => { Environment.Exit(0); };
         } else {
             var world = new World(InputType.BigDB, input, client);
             var sync = new SyncWorld(world, client, target, null);
-        }
 
-        Console.WriteLine("Completed!");
-        Console.ReadLine();
+            sync.OnTimeout += () => { Environment.Exit(-1); };
+            sync.OnCompleted += () => { Environment.Exit(0); };
+        }
     }
 }
