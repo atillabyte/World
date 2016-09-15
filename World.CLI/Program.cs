@@ -27,10 +27,13 @@ class Interface
     {
         switch ((CreateType)Enum.Parse(typeof(CreateType), type, true)) {
             case CreateType.Minimap:
-                if (File.Exists(input))
+                if (File.Exists(input)) {
                     Minimap.Create(new World(InputType.JSON, File.ReadAllText(input), null)).Save(Path.GetFullPath(output));
-                else
-                    Minimap.Create(new World(InputType.BigDB, input, null));
+                    Environment.Exit(0);
+                } else {
+                    Minimap.Create(new World(InputType.BigDB, input, null)).Save(output);
+                    Environment.Exit(0);
+                }
                 break;
         }
     }
