@@ -50,8 +50,8 @@ public partial class World
     public string Description => _properties.Get<string>("worldDescription");
 
     public int Type => _properties.Get<int>("type");
-    public int Width => _properties.ContainsKey("width", false) ? _properties.Get<int>("height") : 200;
-    public int Height => _properties.ContainsKey("width", false) ? _properties.Get<int>("height") : 200;
+    public int Width => _properties.ContainsKey("width", false) ? _properties.Get<int>("width") : 200;
+    public int Height => _properties.ContainsKey("height", false) ? _properties.Get<int>("height") : 200;
 
     public int Plays => _properties.Get<int>("plays");
     public int Woots => _properties.Get<int>("woots");

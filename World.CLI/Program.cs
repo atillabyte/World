@@ -1,22 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using CLAP;
 using Newtonsoft.Json;
 using static World;
 
 class Program
 {
-    static void Main(string[] args)
-    {
-        if (args.Length == 0) {
-            Console.Write("No arguments specified.");
-            return;
-        }
-            
-        Parser.Run<Interface>(args);
-        Thread.Sleep(-1);
-    }
+    static int Main(string[] args) => Parser.RunConsole<Interface>(args);
 }
 
 class Interface
@@ -28,37 +18,30 @@ class Interface
     {
         switch ((CreateType)Enum.Parse(typeof(CreateType), type, true)) {
             case CreateType.Minimap:
-                if (File.Exists(input)) {
-                    Minimap.Create(new World(InputType.JSON, File.ReadAllText(input), null)).Save(Path.GetFullPath(output));
-                    Environment.Exit(0);
-                } else {
-                    Minimap.Create(new World(InputType.BigDB, input, null)).Save(output);
-                    Environment.Exit(0);
-                }
+                var minimap = File.Exists(input) ? 
+                    Minimap.Create(new World(InputType.JSON, File.ReadAllText(input), null)) :
+                    Minimap.Create(new World(InputType.BigDB, input, null));
+
+                minimap.Save(Path.GetFullPath(output));
                 break;
             case CreateType.ExportJSON:
                 File.WriteAllText(output, JsonConvert.SerializeObject(new World(InputType.BigDB, input, null).Source<PlayerIOClient.DatabaseObject>().ToDictionary()));
-                Environment.Exit(0);
                 break;
         }
+
+        Environment.Exit(0);
     }
 
     [Verb(Aliases = "s")]
     public static void Sync([Aliases("u")]string user, [Aliases("a")]string auth, [Aliases("i")]string input, [Aliases("t")]string target)
     {
         var client = PlayerIOClient.Helpers.Authentication.LogOn("everybody-edits-su9rn58o40itdbnw69plyw", user, auth);
-        if (File.Exists(input)) {
-            var world = new World(InputType.JSON, input, client);
-            var sync = new SyncWorld(world, client, target, null);
+        var world = File.Exists(input) ? new World(InputType.JSON, File.ReadAllText(input), client) : new World(InputType.BigDB, input, client);
+        var sync = new SyncWorld(world, client, target, null);
 
-            sync.OnTimeout += () => { Environment.Exit(-1); };
-            sync.OnCompleted += () => { Environment.Exit(0); };
-        } else {
-            var world = new World(InputType.BigDB, input, client);
-            var sync = new SyncWorld(world, client, target, null);
+        sync.OnTimeout += () => { Environment.Exit(-1); };
+        sync.OnCompleted += () => { Environment.Exit(0); };
 
-            sync.OnTimeout += () => { Environment.Exit(-1); };
-            sync.OnCompleted += () => { Environment.Exit(0); };
-        }
+        System.Threading.Thread.Sleep(-1);
     }
 }
