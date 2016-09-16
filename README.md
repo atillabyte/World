@@ -11,7 +11,7 @@ This library allows seamless interaction with Everybody Edits Worlds.
 
 
 # Examples
-> Accessing world propertiies
+> Accessing world propertiis
 
 ```csharp
 var world = new World(InputType.BigDB, "PW01");
