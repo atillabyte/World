@@ -25,7 +25,7 @@ class Interface
                 minimap.Save(Path.GetFullPath(output));
                 break;
             case CreateType.ExportJSON:
-                File.WriteAllText(output, JsonConvert.SerializeObject(new World(InputType.BigDB, input, null).Source<PlayerIOClient.DatabaseObject>().ToDictionary()));
+                File.WriteAllText(Path.GetFullPath(output), new World(InputType.BigDB, input, null).Serialize(OutputType.JSON));
                 break;
         }
 

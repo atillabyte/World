@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Drawing;
 using System.Collections.Generic;
 using PlayerIOClient;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Drawing;
 
 public partial class World : PropertyEnumerable
 {
@@ -33,6 +34,18 @@ public partial class World : PropertyEnumerable
                 this.Blocks = Helpers.FromJsonArray(_world);
                 break;
         }
+    }
+
+    public enum OutputType { JSON }
+    public string Serialize(OutputType type = OutputType.JSON)
+    {
+        switch (type) {
+            case OutputType.JSON:
+                if (_world.GetType().Name == "DatabaseObject" || _world.GetType().Name == "identifier916")
+                    return JsonConvert.SerializeObject(Source<DatabaseObject>().ToDictionary());
+                else throw new ArgumentException("You must specify a DatabaseObject to be serialized.");
+        }
+        throw new ArgumentException("You must specify valid serialization arguments.");
     }
 
     public List<Block> Blocks = new List<Block>();
