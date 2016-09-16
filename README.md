@@ -11,7 +11,7 @@ This library allows seamless interaction with Everybody Edits Worlds.
 
 
 # Examples
-> Accessing world propertiis
+> Accessing world properties
 
 ```csharp
 var world = new World(InputType.BigDB, "PW01");
@@ -22,7 +22,7 @@ var name = world.Name;
 var coins = world.Blocks.Where(x => x.Type == 100 || x.Type == 101).Select(x => x.Locations.Count()).Sum();
 ```
 
-> World serialization and deserialization
+> Serialization and deserialization
 
 ```csharp
 var serialized =  new World(InputType.BigDB, "PW01").Serialize();
