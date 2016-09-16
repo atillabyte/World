@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using static World;
 using CLAP;
+using Newtonsoft.Json;
+using static World;
 
 class Program
 {
@@ -20,7 +21,7 @@ class Program
 
 class Interface
 {
-    public enum CreateType { Minimap }
+    public enum CreateType { Minimap, ExportJSON }
 
     [Verb(Aliases = "c")]
     public static void Create([Aliases("t")]string type, [Aliases("i")]string input, [Aliases("o")]string output)
@@ -34,6 +35,10 @@ class Interface
                     Minimap.Create(new World(InputType.BigDB, input, null)).Save(output);
                     Environment.Exit(0);
                 }
+                break;
+            case CreateType.ExportJSON:
+                File.WriteAllText(output, JsonConvert.SerializeObject(new World(InputType.BigDB, input, null).Source<PlayerIOClient.DatabaseObject>().ToDictionary()));
+                Environment.Exit(0);
                 break;
         }
     }

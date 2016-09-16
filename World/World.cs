@@ -6,31 +6,36 @@ using System.Drawing;
 
 public partial class World : PropertyEnumerable
 {
-    public List<Block> Blocks = new List<Block>();
+    private dynamic _world = null;
+    public T Source<T>() => (T)_world;
 
     public enum InputType { JSON, BigDB }
     public World(InputType type, string input, Client client = null)
     {
-        dynamic world = null;
+        if (client == null)
+            client = PlayerIO.Connect("everybody-edits-su9rn58o40itdbnw69plyw", "public", "user", "", "");
+
         switch (type) {
             case InputType.BigDB:
-                world = client.BigDB.Load("worlds", input);
+                this._world = client.BigDB.Load("worlds", input);
 
-                foreach (var property in (DatabaseObject)world)
+                foreach (var property in (DatabaseObject)_world)
                     _properties.Add(property.Key, property.Value);
 
-                this.Blocks = Helpers.FromWorldData(world.GetArray("worlddata"));
+                this.Blocks = Helpers.FromWorldData(_world.GetArray("worlddata"));
                 break;
             case InputType.JSON:
-                world = JObject.Parse(input);
+                this._world = JObject.Parse(input);
 
-                foreach (var property in world)
+                foreach (var property in _world)
                     _properties.Add(property.Name, property.Value);
 
-                this.Blocks = Helpers.FromJsonArray(world);
+                this.Blocks = Helpers.FromJsonArray(_world);
                 break;
         }
     }
+
+    public List<Block> Blocks = new List<Block>();
 }
 
 /// <summary>
