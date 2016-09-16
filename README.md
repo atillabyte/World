@@ -1,16 +1,10 @@
 # World
-Everybody Edits World Library - Sync &amp; Save Worlds
+Everybody Edits World Library
 
-This library allows saving/uploading worlds to/from JSON directly from BigDB.
+This library allows seamless interaction with Everybody Edits Worlds.
+It allows you to view World properties, such as plays, name, woots, as well as blocks.
 
 # Features
-- Properties automatically in proper packet argument order.
-- A future-proof design, updates unnecessary as long as the server is properly constructed.
-- A very simple, modern and robust format - JSON!
-
-### To-Do
-- Permutation of property order to maintain a last-resort attempt at valid block placement.
-
-### Dependencies
-- PlayerIOClient
-- Newtonsoft.Json
+- A future-proof design, block properties automatically in proper order in Message packet.
+- A modern and rebust format for serialization and deserialization - JSON.
+- A command-line utility serving as functional examples (i.e. creating minimaps and synchronizing worlds to/from JSON).
