@@ -1,9 +1,6 @@
-# World
-Everybody Edits World Library
+# World [![Build status](https://ci.appveyor.com/api/projects/status/x5ip07f7fbv01t7d?svg=true)](https://ci.appveyor.com/project/atillabyte/world)
 
-This library allows seamless interaction with Everybody Edits Worlds.
 ######  :grey_exclamation: This library is currently _read-only_; world properties cannot be modified.
-
 # Features
 - A very simple class which allows for easy interaction with world properties.
 - A future-proof design, block properties automatically in proper order in Message packet.
