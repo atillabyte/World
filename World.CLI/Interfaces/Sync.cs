@@ -7,10 +7,9 @@ using PlayerIOClient;
 public class SyncWorld
 {
     public event OnCompleteHandler OnCompleted;
-    public delegate void OnCompleteHandler();
-
-
     public event OnTimeoutHandler OnTimeout;
+
+    public delegate void OnCompleteHandler();
     public delegate void OnTimeoutHandler();
 
     public SyncWorld(World world, Client client, string targetId, Connection connection, int retries = 0)

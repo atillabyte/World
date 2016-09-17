@@ -53,7 +53,7 @@ public partial class World : PropertyEnumerable
 
 /// <summary>
 /// This class is for intended as ease-of-use for common applications.
-/// If a property is not referenced, it can alternatively be accessed through world["propertyName"]
+/// If a property is not referenced, it can alternatively be accessed through world["propertyName"].
 /// </summary>
 public partial class World
 {
@@ -108,8 +108,8 @@ public partial class World
         public List<Location> Locations = new List<Location>();
         public class Location
         {
-            public int X { get; set; }
-            public int Y { get; set; }
+            public int X { get; internal set; }
+            public int Y { get; internal set; }
         }
     }
 }
@@ -245,7 +245,7 @@ public class PropertyEnumerable
     public object this[string key]
     {
         get { return _properties.ContainsKey(key) ? _properties[key] : null; }
-        set {
+        internal set {
             if (_properties.ContainsKey(key))
                 _properties.Add(key, value);
             else

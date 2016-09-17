@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using CLAP;
-using Newtonsoft.Json;
 using static World;
 
 class Program
@@ -18,10 +17,7 @@ class Interface
     {
         switch ((CreateType)Enum.Parse(typeof(CreateType), type, true)) {
             case CreateType.Minimap:
-                var minimap = File.Exists(input) ? 
-                    Minimap.Create(new World(InputType.JSON, File.ReadAllText(input), null)) :
-                    Minimap.Create(new World(InputType.BigDB, input, null));
-
+                var minimap = File.Exists(input) ? Minimap.Create(new World(InputType.JSON, File.ReadAllText(input))) : Minimap.Create(new World(InputType.BigDB, input));
                 minimap.Save(Path.GetFullPath(output));
                 break;
             case CreateType.ExportJSON:
