@@ -2,6 +2,7 @@
 Everybody Edits World Library
 
 This library allows seamless interaction with Everybody Edits Worlds.
+######  :grey_exclamation: This library is currently _read-only_; world properties cannot be modified.
 
 # Features
 - A very simple class which allows for easy interaction with world properties.
