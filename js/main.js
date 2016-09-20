@@ -6,8 +6,8 @@ var ctxfg = canvasfg.getContext("2d");
 var ctxbg = canvasbg.getContext("2d");
 
 var width = 25, height = 25;
+var name = "", owner = "";
 var worlddata = [];
-var name = "";
 var blocks = [];
 
 $(window).waitForImages(function() {
@@ -85,8 +85,8 @@ function clearMap() {
             }
 }
 
-function example() {
-    $.getJSON('example.json', function(data) {
+function load(url) {
+    $.getJSON(url, function(data) {
         init_json(data);
     });
 }
@@ -108,6 +108,8 @@ function init_json(data) {
 
         if (key == "name")
             name = value;
+        if (key == "owner")
+            owner = value;
 
         if (key == "worlddata") {
             $.each(value, function(index, object) {
@@ -162,6 +164,8 @@ function init_json(data) {
     clearMap();
 
     $("#world-name").text('"' + name + '"');
+    $("#owner-name").text(owner);
+    $("#owner-name").attr("href", "http://ee.yonom.org/~" + owner);
 
     var bg = [], fg = [];
     worlddata.forEach(function(block) {

@@ -4,10 +4,12 @@
     </head>
     <body style="background-color: #000">
         <div id="wrapper">
-            <div class="noselect glow" style="position: fixed; z-index: 3; left: 50%; top: 10px; width:500px; height:100px;">
-                <tag id="world-name">"World Name"</tag> by <a id="owner-name" class="noselect glow" href="http://ee.yonom.org/~userid">username</a>
-                <a id="example" class="noselect glow" href="#example" onclick="example(); void 0;">(load example)</a>
-                <a id="clear" class="noselect glow" href="#clear" onclick="clearMap(); void 0;">(clear)</a>
+            <div class="noselect glow" style="position: fixed; z-index: 3; left: 50%; top: 10px; width:100%px; height:100px;">
+                <tag id="world-name">"World Name"</tag> by <a id="owner-name" class="noselect glow" href="http://ee.yonom.org/~userid" target="_blank">username</a>
+                <a class="noselect glow" href="#" onclick="load(prompt()); void 0;">(load from url)</a>
+                <!--<a id="example" class="noselect glow" href="#example" onclick="example(); void 0;">(load example)</a>-->
+                <!--<a id="clear" class="noselect glow" href="#clear" onclick="clearMap(); void 0;">(clear)</a>-->
+				<tag style="font-size: 8pt; position: fixed; left: 0%; top: 98%;">(note: drag &amp; drop JSON worlds into this window.)</tag>
             </div>
         </div>
          <canvas style="position: absolute; z-index: 1;"  id="canvasfg" width="400" height="400"></canvas>
