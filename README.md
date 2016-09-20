@@ -29,3 +29,6 @@ var deserialized = new World(InputType.JSON, serialized, null);
 
 # World.CLI
 > Documentation is in progress, you may look at [World.CLI](https://github.com/atillabyte/World/blob/master/World.CLI/Program.cs) in the meantime.
+
+# World.Web
+[World.Web](https://atillabyte.github.io/World) `This utility is currently in beta - see gh-pages branch.`
