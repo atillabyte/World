@@ -63,8 +63,8 @@ public partial class World
     public string Description => _properties.Get<string>("worldDescription");
 
     public int Type => _properties.Get<int>("type");
-    public int Width => _properties.ContainsKey("width", false) ? _properties.Get<int>("width") : 200;
-    public int Height => _properties.ContainsKey("height", false) ? _properties.Get<int>("height") : 200;
+    public int Width => _properties.ContainsKey("width") ? _properties.Get<int>("width") : 200;
+    public int Height => _properties.ContainsKey("height") ? _properties.Get<int>("height") : 200;
 
     public int Plays => _properties.Get<int>("plays");
     public int Woots => _properties.Get<int>("woots");
@@ -81,7 +81,7 @@ public partial class World
     public Color BackgroundColor
     {
         get {
-            if (!_properties.ContainsKey("backgroundColor", false))
+            if (!_properties.ContainsKey("backgroundColor"))
                 return Color.FromArgb(-16777216);
 
             var value = _properties.Get<uint>("backgroundColor");
@@ -93,8 +93,8 @@ public partial class World
 
     public class Block : PropertyEnumerable
     {
-        public int Type => Convert.ToInt32(_properties.Get<object>("type"));
-        public int Layer => Convert.ToInt32(_properties.Get<object>("layer"));
+        public uint Type => _properties.Get<uint>("type");
+        public int Layer => _properties.Get<int>("layer");
 
         public int Rotation => _properties.Get<int>("rotation");
         public int Goal => _properties.Get<int>("goal");
@@ -140,27 +140,10 @@ public static class Helpers
 
     public static T Get<T>(this Dictionary<string, object> dictionary, string key)
     {
-        if (dictionary.ContainsKey(key.ToLower()))
-            foreach (var kvp in dictionary)
-                if (kvp.Key.ToLower() == key.ToLower())
-                    if (kvp.Value.GetType() == typeof(JValue))
-                        return ((JValue)kvp.Value).ToObject<T>();
-                    else
-                        return (T)kvp.Value;
+        if (dictionary.ContainsKey(key))
+            return dictionary[key].GetType() == typeof(JValue) ? (((JValue)(dictionary[key])).ToObject<T>()) : (T)(dictionary[key]);
 
         return default(T);
-    }
-
-    public static bool ContainsKey(this Dictionary<string, object> dictionary, string key, bool sensitive)
-    {
-        if (!sensitive) {
-            foreach (var k in dictionary.Keys)
-                if (k.ToLower() == key.ToLower())
-                    return true;
-        } else
-            return dictionary.ContainsKey(key);
-
-        return false;
     }
 
     private static byte[] TryGetBytes(this DatabaseObject input, string key, byte[] defaultValue)
@@ -239,7 +222,7 @@ public static class Helpers
 
 public class PropertyEnumerable
 {
-    internal Dictionary<string, object> _properties = new Dictionary<string, object>();
+    internal Dictionary<string, object> _properties = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
 
     public Dictionary<string, object> Properties => _properties;
     public object this[string key]

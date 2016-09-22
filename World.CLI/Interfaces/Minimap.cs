@@ -16,16 +16,16 @@ public static class Minimap
         bitmap.Lock();
         bitmap.Clear(world.BackgroundColor);
 
-        foreach (var block in world.Blocks.Where(block => colors[Convert.ToInt32(block.Type)] != 0u).OrderByDescending(x => x.Layer >= 1))
+        foreach (var block in world.Blocks.Where(block => colors[block.Type] != 0u).OrderByDescending(x => x.Layer >= 1))
             foreach (var location in block.Locations)
-                bitmap.SetPixel(location.X, location.Y, colors[Convert.ToInt32(block.Type)]);
+                bitmap.SetPixel(location.X, location.Y, colors[block.Type]);
 
         bitmap.Unlock();
         return canvas;
     }
 
-    static Dictionary<int, uint> colors = new WebClient() { Proxy = null }.DownloadString("https://raw.githubusercontent.com/EEJesse/EEBlocks/master/Colors.txt").Split('\n')
-            .Where(x => !string.IsNullOrEmpty(x)).ToDictionary(x => int.Parse(x.Split(' ')[0]), x => uint.Parse(x.Split(' ')[1]));
+    static Dictionary<uint, uint> colors = new WebClient() { Proxy = null }.DownloadString("https://raw.githubusercontent.com/EEJesse/EEBlocks/master/Colors.txt").Split('\n')
+            .Where(x => !string.IsNullOrEmpty(x)).ToDictionary(x => uint.Parse(x.Split(' ')[0]), x => uint.Parse(x.Split(' ')[1]));
 }
 
 /// <!-- FastBitmap | The MIT License (MIT) | (c) Luiz Fernando Silva -->
