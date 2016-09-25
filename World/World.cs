@@ -141,7 +141,7 @@ public static class Helpers
     public static T Get<T>(this Dictionary<string, object> dictionary, string key)
     {
         if (dictionary.ContainsKey(key))
-            return dictionary[key].GetType() == typeof(JValue) ? (((JValue)(dictionary[key])).ToObject<T>()) : (T)(dictionary[key]);
+            return dictionary[key].GetType() == typeof(JValue) ? (((JValue)(dictionary[key])).ToObject<T>()) : (T)Convert.ChangeType(dictionary[key], typeof(T));
 
         return default(T);
     }
