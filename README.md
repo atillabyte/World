@@ -28,7 +28,20 @@ var deserialized = new World(InputType.JSON, serialized, null);
 ```
 
 # World.CLI
-> Documentation is in progress, you may look at [World.CLI](https://github.com/atillabyte/World/blob/master/World.CLI/Program.cs) in the meantime.
+> Synchronising worlds from JSON.
+```csharp
+World.CLI.exe sync -u:email -a:password -i:world.json -t:PWTargetEI
+```
+
+> Generating world minimaps from JSON.
+```csharp
+World.CLI.exe create -t:minimap -i:PWTargetEI -o:world.png  
+```
+
+> Exporting world to JSON.
+```csharp
+World.CLI.exe create -t:exportjson -i:PWTargetEI -o:world.json  
+```
 
 # World.Web
 [World.Web](https://atillabyte.github.io/World) `This utility is currently in beta - see gh-pages branch.`
