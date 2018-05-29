@@ -105,6 +105,11 @@ public partial class World
         public string Text => _properties.Get<string>("text");
         public int SignType => _properties.Get<int>("signtype");
 
+        public string Name => _properties.Get<string>("name");
+        public string TextMessage1 => _properties.Get<string>("mes1");
+        public string TextMessage2 => _properties.Get<string>("mes2");
+        public string TextMessage3 => _properties.Get<string>("mes3");
+
         public List<Location> Locations = new List<Location>();
         public class Location
         {
