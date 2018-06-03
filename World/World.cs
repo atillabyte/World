@@ -10,15 +10,29 @@ public partial class World : PropertyEnumerable
     private dynamic _world = null;
     public T Source<T>() => (T)_world;
 
-    public enum InputType { JSON, BigDB }
-    public World(InputType type, string input, Client client = null)
+    public enum InputType { JSON, BigDB, DatabaseObject }
+    public World(InputType type, object input, Client client = null)
     {
         if (client == null)
             client = PlayerIO.Connect("everybody-edits-su9rn58o40itdbnw69plyw", "public", "user", "", "");
 
         switch (type) {
+            case InputType.DatabaseObject:
+                if (!(input is DatabaseObject))
+                    throw new ArgumentException("input needs to be a DatabaseObject!");
+
+                this._world = (DatabaseObject)input;
+
+                foreach (var property in (DatabaseObject)_world)
+                    _properties.Add(property.Key, property.Value);
+
+                this.Blocks = Helpers.FromWorldData(_world.GetArray("worlddata"));
+                break;
             case InputType.BigDB:
-                this._world = client.BigDB.Load("worlds", input);
+                if (!(input is string))
+                    throw new ArgumentException("input needs to be a string!");
+
+                this._world = client.BigDB.Load("worlds", (string)input);
 
                 foreach (var property in (DatabaseObject)_world)
                     _properties.Add(property.Key, property.Value);
@@ -26,7 +40,10 @@ public partial class World : PropertyEnumerable
                 this.Blocks = Helpers.FromWorldData(_world.GetArray("worlddata"));
                 break;
             case InputType.JSON:
-                this._world = JObject.Parse(input);
+                if (!(input is string))
+                    throw new ArgumentException("input needs to be a string!");
+
+                this._world = JObject.Parse((string)input);
 
                 foreach (var property in _world)
                     _properties.Add(property.Name, property.Value);
@@ -41,7 +58,7 @@ public partial class World : PropertyEnumerable
     {
         switch (type) {
             case OutputType.JSON:
-                if (_world.GetType().Name == "DatabaseObject" || _world.GetType().Name == "identifier916")
+                if (_world.GetType().Name == "DatabaseObject" || _world.GetType().Name == "identifier916" || _world.GetType().Name == "identifier918")
                     return JsonConvert.SerializeObject(Source<DatabaseObject>().ToDictionary());
                 else throw new ArgumentException("You must specify a DatabaseObject to be serialized.");
         }
@@ -124,16 +141,18 @@ public static class Helpers
     private static Dictionary<object, object> ToDictionary(this DatabaseObject dbo, object input)
     {
         var dict = new Dictionary<object, object>();
-        var spec = new List<string>() { "DatabaseObject", "identifier916", "DatabaseArray", "identifier917" };
+        var spec = new List<string>() { "DatabaseObject", "identifier916", "identifier918", "DatabaseArray", "identifier917", "identifier919" };
 
         switch (input.GetType().Name) {
             case "DatabaseObject":
             case "identifier916":
+            case "identifier918":
                 foreach (var o in ((DatabaseObject)input))
                     dict.Add(o.Key, spec.Contains(o.Value.GetType().Name) ? ToDictionary(null, o.Value) : o.Value);
                 break;
             case "DatabaseArray":
             case "identifier917":
+            case "identifier919":
                 foreach (var o in ((DatabaseArray)input).IndexesAndValues)
                     dict.Add(o.Key, spec.Contains(o.Value.GetType().Name) ? ToDictionary(null, o.Value) : o.Value);
                 break;
